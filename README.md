@@ -1,4 +1,3 @@
-```markdown
 ## Prerequisites
 
 Make sure you have the following tools installed on your computer:
@@ -37,4 +36,3 @@ Follow these steps to set up and run the project:
    ```bash
    expo start
    ```
-```
