@@ -1,4 +1,3 @@
-```markdown
 ## Prerequisites
 
 Make sure you have the following tools installed on your computer:
