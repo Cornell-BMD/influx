@@ -3,7 +3,6 @@ import {
   SafeAreaView,
   FlatList,
   StyleSheet,
-  StatusBar,
   View,
   Text,
   TextInput,
@@ -14,12 +13,12 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const DATA = [
-  { id: '1', name: 'John Doe', age: 20, currentDosage: 300 },
-  { id: '2', name: 'Mary Lion', age: 30, currentDosage: 200 },
-  { id: '3', name: 'Tatenda Gonese', age: 40, currentDosage: 100 },
-  { id: '4', name: 'John Long', age: 40, currentDosage: 100 },
-  { id: '5', name: 'Mandy Mears', age: 40, currentDosage: 100 },
-  { id: '6', name: 'Patient 1', age: 40, currentDosage: 100 },
+  { id: '1', name: 'Susan Bridget', isFavorite: true },
+  { id: '2', name: 'Elias Trent', isFavorite: false },
+  { id: '3', name: 'Mariana Solis', isFavorite: false },
+  { id: '4', name: 'Wellington Mapise', isFavorite: false },
+  { id: '5', name: 'Tatenda Gonese', isFavorite: false },
+  { id: '6', name: 'John Doe', isFavorite: false },
 ];
 
 const screenWidth = Dimensions.get('window').width;
@@ -27,8 +26,9 @@ const screenWidth = Dimensions.get('window').width;
 const PatientList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSortedAscending, setIsSortedAscending] = useState(true);
+  const [patients, setPatients] = useState(DATA);
 
-  const filteredData = DATA.filter(item =>
+  const filteredData = patients.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -36,30 +36,43 @@ const PatientList = () => {
     isSortedAscending ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
   );
 
+  const toggleFavorite = (id: string) => {
+    const updatedPatients = patients.map((item) =>
+      item.id === id ? { ...item, isFavorite: !item.isFavorite } : item
+    );
+    setPatients(updatedPatients);
+  };
+
   const renderItem = ({ item }: { item: typeof DATA[0] }) => (
     <View style={styles.card}>
       <View style={styles.cardContent}>
         <Image
-          source={{ uri: "https://static.vecteezy.com/system/resources/previews/009/391/589/non_2x/man-face-clipart-design-illustration-free-png.png" }}
+          source={{
+            uri: 'https://static.vecteezy.com/system/resources/previews/009/391/589/non_2x/man-face-clipart-design-illustration-free-png.png',
+          }}
           style={styles.avatar}
         />
         <View style={styles.textContainer}>
           <Text style={styles.title}>{item.name}</Text>
-          <Text style={styles.text}>Age: {item.age}</Text>
-          <Text style={styles.text}>Current Dosage: {item.currentDosage} mg</Text>
         </View>
+        <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
+          <Icon
+            name={item.isFavorite ? 'star' : 'star-outline'}
+            size={24}
+            color={item.isFavorite ? '#fbbf24' : '#9ca3af'}
+          />
+        </TouchableOpacity>
       </View>
+      <TouchableOpacity style={styles.detailsButton}>
+        <Text style={styles.detailsButtonText}>Details</Text>
+      </TouchableOpacity>
     </View>
   );
-
-  const handleSort = () => {
-    setIsSortedAscending(!isSortedAscending);
-  };
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Title */}
-      <Text style={styles.titleText}>Patient List</Text>
+      <Text style={styles.titleText}>Find Your Patient</Text>
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
@@ -73,20 +86,18 @@ const PatientList = () => {
         />
       </View>
 
-      {/* Sort Button (conditionally rendered) */}
-      {sortedData.length > 0 && (
-        <View style={styles.sortContainer}>
-          <TouchableOpacity onPress={handleSort}>
-            <Icon
-              name={isSortedAscending ? "sort-by-alpha" : "sort"}
-              size={20}
-              color="skyblue"
-            />
-          </TouchableOpacity>
-        </View>
-      )}
+      {/* Sort Button */}
+      <View style={styles.sortContainer}>
+        <TouchableOpacity onPress={() => setIsSortedAscending(!isSortedAscending)}>
+          <View style={styles.sortButton}>
+            <Text style={styles.sortText}>
+              {isSortedAscending ? 'A → Z' : 'Z → A'}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
 
-      {/* Patient List or Not Found Message */}
+      {/* Patient List */}
       {sortedData.length > 0 ? (
         <FlatList
           data={sortedData}
@@ -95,7 +106,7 @@ const PatientList = () => {
           contentContainerStyle={styles.listContent}
         />
       ) : (
-        <View style={[styles.listContent, styles.notFoundContainer]}>
+        <View style={styles.notFoundContainer}>
           <Text style={styles.notFoundText}>No patients found</Text>
         </View>
       )}
@@ -106,27 +117,26 @@ const PatientList = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: StatusBar.currentHeight || 0,
-    backgroundColor: '#fff', // Set background color to white
+    backgroundColor: '#f7f7f7',
   },
   titleText: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'left',
+    textAlign: 'center',
     marginVertical: 10,
-    marginLeft: 16,
-    color: '#333',
+    color: '#6b7280',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    margin: 8,
+    marginHorizontal: 16,
+    marginBottom: 8,
     borderColor: '#ddd',
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
     height: 40,
-    backgroundColor: '#f9f9f9', // Light background for the search bar
+    backgroundColor: '#ffffff',
   },
   searchIcon: {
     marginRight: 5,
@@ -138,47 +148,73 @@ const styles = StyleSheet.create({
   sortContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginHorizontal: 8,
+    marginHorizontal: 16,
     marginBottom: 8,
   },
+  sortButton: {
+    backgroundColor: '#e0e7ff',
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  sortText: {
+    fontSize: 12,
+    color: '#4f46e5',
+    fontWeight: '600',
+  },
   card: {
-    backgroundColor: '#fff', // Set card color to white
-    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
     marginVertical: 8,
-    padding: 10,
-    width: screenWidth * 0.9,
+    marginHorizontal: 250,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+    width: 350,
     alignSelf: 'center',
-    borderColor: '#000', // Black border around each card
-    borderWidth: 1,
-    elevation: 3, // Optional: Adds shadow on Android for a subtle effect
+   
   },
   cardContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 15,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 16,
   },
   textContainer: {
-    flexShrink: 1,
+    flex: 1,
   },
   title: {
     fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 16,
+    color: '#374151',
   },
-  text: {
+  detailsButton: {
+    marginTop: 12,
+    alignSelf: 'flex-start',
+    backgroundColor: '#a78bfa',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  detailsButtonText: {
     fontSize: 14,
-    color: '#333',
+    fontWeight: '600',
+    color: '#ffffff',
   },
   listContent: {
-    paddingBottom: 20,
-    flexGrow: 1,
-    justifyContent: 'center',
+    paddingBottom: 16,
   },
   notFoundContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   notFoundText: {

@@ -29,6 +29,18 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="Messages"
+        options={{
+          title: 'Messages',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'chatbubble' : 'chatbubble-outline'} color={color} />
+          ),
+        }}
+      />
+
+      
       <Tabs.Screen
         name="Profile"
         options={{
@@ -38,6 +50,8 @@ export default function TabLayout() {
           ),
         }}
       />
+
+
     </Tabs>
   );
 }
