@@ -1,11 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import PatientList from '../../components/PatientList';
+import PatientList from '../../components/PatientDetails';
+import PatientDetails from '../../components/PatientDetails';
 
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
-      <PatientList />
+      <PatientDetails/>
     </View>
   );
 }

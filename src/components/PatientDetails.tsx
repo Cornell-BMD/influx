@@ -1,195 +1,264 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  Button,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-  TextInput,
-  Alert,
-  ScrollView
-} from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
-const PatientDetails = () => {
-  const [isDosageModalVisible, setIsDosageModalVisible] = useState(false);
-  const [isEmergencyModalVisible, setIsEmergencyModalVisible] = useState(false);
-  const [dosage, setDosage] = useState('');
-  const [currentDosage, setCurrentDosage] = useState(50); // Default dosage
-
-  // Handlers
-  const handleDosageUpdate = () => {
-    const newDosage = parseInt(dosage, 10);
-    if (!isNaN(newDosage) && newDosage > 0) {
-      setCurrentDosage(newDosage);
-      Alert.alert('Dosage Updated', `New dosage set to: ${newDosage}mg`);
-      setIsDosageModalVisible(false);
-    } else {
-      Alert.alert('Invalid Input', 'Please enter a valid dosage amount.');
-    }
-  };
-
-  const handleEmergencyShutOff = () => {
-    setIsEmergencyModalVisible(true);
-  };
-
-  const confirmEmergencyShutOff = () => {
-    Alert.alert('System Shut Off', 'Emergency shut off activated.');
-    setIsEmergencyModalVisible(false);
-  };
-
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>Patient: John Doe</Text>
-
-      {/* Emergency Shut Off Button */}
-      <TouchableOpacity
-        style={styles.emergencyButton}
-        onPress={handleEmergencyShutOff}
-      >
-        <Text style={styles.emergencyButtonText}>Emergency Shut Off</Text>
-      </TouchableOpacity>
-
-      {/* Patient Information Section */}
-      <Text style={styles.sectionTitle}>Patient Information</Text>
-      <View style={styles.infoBox}>
-        <Text>Date of Birth: 01/01/1980</Text>
-        <Text>Age: 43</Text>
-        <Text>Current Dosage: {currentDosage}mg</Text>
-      </View>
-
-      {/* Change Dosage Button */}
-      <TouchableOpacity
-        style={styles.changeDosageButton}
-        onPress={() => setIsDosageModalVisible(true)}
-      >
-        <Text style={styles.changeDosageText}>Change Dosage</Text>
-      </TouchableOpacity>
-
-      {/* Dosage Modal */}
-      <Modal
-        visible={isDosageModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setIsDosageModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalHeader}>Change Dosage</Text>
-            <TextInput
-              style={styles.input}
-              value={dosage}
-              onChangeText={setDosage}
-              placeholder="Enter new dosage..."
-              keyboardType="numeric"
-            />
-            <View style={styles.modalButtons}>
-              <Button title="Submit" onPress={handleDosageUpdate} />
-              <Button title="Cancel" color="red" onPress={() => setIsDosageModalVisible(false)} />
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Emergency Modal */}
-      <Modal
-        visible={isEmergencyModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setIsEmergencyModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalHeader}>Confirm Emergency Shut Off</Text>
-            <Text>Are you sure you want to shut off the system?</Text>
-            <View style={styles.modalButtons}>
-              <Button title="Yes" onPress={confirmEmergencyShutOff} />
-              <Button title="No" color="red" onPress={() => setIsEmergencyModalVisible(false)} />
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </ScrollView>
-  );
+type TreatmentItem = {
+  time: string;
+  injected: string;
+  remaining: string;
+  completed: boolean;
 };
 
-export default PatientDetails;
+type Message = {
+  id: string;
+  doctorName: string;
+  date: string;
+  subject: string;
+};
+
+const PatientDetails = () => {
+  const [treatmentPlan, setTreatmentPlan] = useState<TreatmentItem[]>([
+    { time: '7:30', injected: '10mL', remaining: '93%', completed: true },
+    { time: '8:25', injected: '10mL', remaining: '86%', completed: true },
+    { time: '9:55', injected: '15mL', remaining: '75%', completed: false },
+    { time: '11:25', injected: '15mL', remaining: '64%', completed: false },
+    { time: '13:30', injected: '18mL', remaining: '52%', completed: false },
+  ]);
+
+  const [messages, setMessages] = useState<Message[]>([
+    { id: '1', doctorName: 'Dr. Lila Millington', date: '12/03/2023', subject: 'Updated Morning Dosage' },
+    { id: '2', doctorName: 'Dr. Lila Millington', date: '11/14/2023', subject: 'Appointment Summary' },
+  ]);
+
+  const toggleCompletion = (index: number) => {
+    const updatedPlan = [...treatmentPlan];
+    updatedPlan[index].completed = !updatedPlan[index].completed;
+    setTreatmentPlan(updatedPlan);
+  };
+
+  const renderTreatmentItem = ({ item, index }: { item: TreatmentItem, index: number }) => (
+    <View style={styles.treatmentRow}>
+      <Text style={styles.treatmentTime}>{item.time}</Text>
+      <View style={styles.timelineDot} />
+      <Text style={styles.treatmentInjected}>{item.injected}</Text>
+      <Text style={styles.treatmentRemaining}>{item.remaining}</Text>
+      <TouchableOpacity onPress={() => toggleCompletion(index)}>
+        <MaterialIcons
+          name={item.completed ? 'check-circle' : 'radio-button-unchecked'}
+          size={24}
+          color={item.completed ? '#4CAF50' : '#B0B0B0'}
+        />
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderMessageItem = ({ item }: { item: Message }) => (
+    <View style={styles.messageCard}>
+      <View style={styles.messageRow}>
+        <Text style={styles.messageDoctor}>{item.doctorName}</Text>
+        <Text style={styles.messageDate}>{item.date}</Text>
+      </View>
+      <Text style={styles.messageSubject}>{item.subject}</Text>
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity>
+          <MaterialIcons name="menu" size={28} color="#4A4A4A" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <MaterialIcons name="notifications" size={28} color="#4A4A4A" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Device Status Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>DEVICE STATUS</Text>
+        <View style={styles.deviceStatus}>
+          <View style={styles.dosageContainer}>
+            <Text style={styles.dosageLabel}>Remaining Dosage</Text>
+            <View style={styles.dosageCircle}>
+              <Text style={styles.dosageText}>100%</Text>
+            </View>
+          </View>
+          <View style={styles.deviceDetails}>
+            <Text style={styles.nextReplacement}>Next replacement in <Text style={styles.bold}>1 day</Text></Text>
+            <TouchableOpacity style={styles.emergencyButton}>
+              <Text style={styles.emergencyText}>EMERGENCY SHUTOFF</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+
+      {/* Treatment Plan Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>TREATMENT PLAN</Text>
+        <FlatList
+          data={treatmentPlan}
+          renderItem={renderTreatmentItem}
+          keyExtractor={(item, index) => index.toString()}
+        />
+      </View>
+
+      {/* Messages Section */}
+      <View style={styles.section}>
+        <View style={styles.messagesHeader}>
+          <Text style={styles.sectionTitle}>MESSAGES</Text>
+          <TouchableOpacity>
+            <Text style={styles.viewAll}>View All</Text>
+          </TouchableOpacity>
+        </View>
+        <FlatList
+          data={messages}
+          renderItem={renderMessageItem}
+          keyExtractor={(item) => item.id}
+        />
+      </View>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#F8F9FB',
   },
   header: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  emergencyButton: {
-    backgroundColor: 'red',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  emergencyButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  infoBox: {
-    backgroundColor: '#ffffff',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  changeDosageButton: {
-    backgroundColor: '#4CAF50',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  changeDosageText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    width: '80%',
-    alignItems: 'center',
-  },
-  modalHeader: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
-  },
-  input: {
-    width: '100%',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
+    marginBottom: 20,
+    marginTop: 70,
+  },
+  section: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 20,
+    elevation: 5,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#4A4A4A',
+  },
+  deviceStatus: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dosageContainer: {
+    alignItems: 'center',
+  },
+  dosageLabel: {
+    fontSize: 14,
+    color: '#4A4A4A',
+  },
+  dosageCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#EDE7F6',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginTop: 10,
   },
+  dosageText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#673AB7',
+  },
+  deviceDetails: {
+    alignItems: 'flex-end',
+  },
+  nextReplacement: {
+    fontSize: 14,
+    marginBottom: 10,
+    color: '#4A4A4A',
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  emergencyButton: {
+    backgroundColor: '#F44336',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 5,
+  },
+  emergencyText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  treatmentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  treatmentTime: {
+    fontSize: 14,
+    color: '#4A4A4A',
+    flex: 1,
+  },
+  timelineDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#9C27B0',
+    marginHorizontal: 10,
+  },
+  treatmentInjected: {
+    fontSize: 14,
+    color: '#4A4A4A',
+    flex: 1,
+    textAlign: 'center',
+  },
+  treatmentRemaining: {
+    fontSize: 14,
+    color: '#9C27B0',
+    flex: 1,
+    textAlign: 'center',
+  },
+  messagesHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  viewAll: {
+    fontSize: 14,
+    color: '#673AB7',
+    fontWeight: 'bold',
+  },
+  messageCard: {
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 10,
+    elevation: 3,
+    marginBottom: 10,
+  },
+  messageRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 5,
+  },
+  messageDoctor: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#4A4A4A',
+  },
+  messageDate: {
+    fontSize: 12,
+    color: '#B0B0B0',
+  },
+  messageSubject: {
+    fontSize: 14,
+    color: '#4A4A4A',
+    fontStyle: 'italic',
+  },
 });
+
+export default PatientDetails;

@@ -66,10 +66,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     elevation: 2,
+    height: 400
   },
   avatar: {
-    width: 120,
-    height: 120,
+    width: 200,
+    height: 200,
     borderRadius: 60,
   },
   name: {
@@ -87,6 +88,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 15,
     elevation: 2,
+    height: 100
   },
   sectionTitle: {
     fontSize: 18,

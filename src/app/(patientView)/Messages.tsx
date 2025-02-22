@@ -5,9 +5,6 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
-  TouchableOpacity,
-  Modal,
-  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Menu, MenuTrigger, MenuOptions, MenuOption, MenuProvider } from 'react-native-popup-menu';
@@ -26,7 +23,6 @@ interface MessagesScreenProps {
 const MessagesScreen: React.FC<MessagesScreenProps> = ({ messages: initialMessages }) => {
   const [messages, setMessages] = useState<Message[] | null>(initialMessages || null);
   const [loading, setLoading] = useState<boolean>(!initialMessages);
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
 
   // Dynamic data fetching
   const fetchMessages = async () => {
@@ -97,10 +93,6 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ messages: initialMessag
             </MenuOptions>
           </Menu>
           <Text style={styles.header}>MESSAGES</Text>
-          {/* Compose Icon */}
-          <TouchableOpacity onPress={() => setModalVisible(true)}>
-            <Ionicons name="create-outline" size={24} color="#6b7280" />
-          </TouchableOpacity>
         </View>
 
         {/* Messages List */}
@@ -110,44 +102,6 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ messages: initialMessag
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
         />
-
-        {/* Modal for Message Composition */}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>MESSAGE COMPOSITION</Text>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>To</Text>
-                <TextInput
-                  style={styles.textInput}
-                  placeholder="Enter recipient"
-                />
-              </View>
-              <TextInput
-                style={styles.messageInput}
-                placeholder="Type your message here..."
-                multiline={true}
-              />
-              <View style={styles.modalActions}>
-                <TouchableOpacity
-                  onPress={() => setModalVisible(false)}
-                  style={styles.cancelButton}
-                >
-                  <Text style={styles.cancelText}>Cancel Composition</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.sendButton}>
-                  <Text style={styles.sendText}>Send</Text>
-                  <Ionicons name="send" size={18} color="#ffffff" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
       </View>
     </MenuProvider>
   );
@@ -230,70 +184,6 @@ const styles = StyleSheet.create({
   noMessagesText: {
     fontSize: 16,
     color: '#6b7280',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContainer: {
-    width: '90%',
-    backgroundColor: '#a78bfa',
-    borderRadius: 12,
-    padding: 16,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#ffffff',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  inputGroup: {
-    marginBottom: 12,
-  },
-  label: {
-    color: '#ffffff',
-    marginBottom: 4,
-  },
-  textInput: {
-    backgroundColor: '#ffffff',
-    padding: 8,
-    borderRadius: 6,
-  },
-  messageInput: {
-    backgroundColor: '#ffffff',
-    padding: 8,
-    borderRadius: 6,
-    minHeight: 100,
-    textAlignVertical: 'top',
-    marginBottom: 16,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  cancelButton: {
-    flex: 1,
-  },
-  cancelText: {
-    color: '#ffffff',
-    fontSize: 14,
-  },
-  sendButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#4ade80',
-    borderRadius: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  sendText: {
-    color: '#ffffff',
-    fontSize: 14,
-    marginRight: 8,
   },
 });
 

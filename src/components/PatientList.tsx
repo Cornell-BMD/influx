@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   SafeAreaView,
@@ -11,6 +12,7 @@ import {
   Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+const router = useRouter();
 
 const DATA = [
   { id: '1', name: 'Susan Bridget', isFavorite: true },
@@ -63,9 +65,13 @@ const PatientList = () => {
           />
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.detailsButton}>
-        <Text style={styles.detailsButtonText}>Details</Text>
-      </TouchableOpacity>
+      <TouchableOpacity 
+  style={styles.detailsButton} 
+  //onPress={() => router.push(`/details/${item.id}`)}
+>
+  <Text style={styles.detailsButtonText}>Details</Text>
+</TouchableOpacity>
+
     </View>
   );
 
