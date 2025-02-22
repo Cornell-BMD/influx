@@ -11,12 +11,15 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Menu, MenuTrigger, MenuOptions, MenuOption, MenuProvider } from 'react-native-popup-menu';
+import { Timestamp } from 'react-native-reanimated/lib/typescript/commonTypes';
 
 interface Message {
-  id: string;
-  sender: string;
-  date: string;
+  physician_id: string; //maybe uuid
+  sent: Timestamp; //maybe consider date here
   subject: string;
+  body: string;
+  patient_id: string; // going to be used to fetch the name
+  name: string // what to display  as title for the message
 }
 
 interface MessagesScreenProps {
@@ -32,7 +35,7 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ messages: initialMessag
   const fetchMessages = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3000/messages'); // Replace with API endpoint
+      const response = await fetch('http://localhost:3000/messages'); // Replace with API endpoint from backend
       const data: Message[] = await response.json();
       setMessages(data);
     } catch (error) {
@@ -52,10 +55,11 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ messages: initialMessag
     <View style={styles.messageContainer}>
       <View style={styles.messageHeader}>
         <View style={styles.indicator} />
-        <Text style={styles.sender}>{item.sender}</Text>
-        <Text style={styles.date}>{item.date}</Text>
+        <Text style={styles.sender}>{item.name}</Text>
+        <Text style={styles.date}>{item.sent}</Text>
       </View>
       <Text style={styles.subject}>{item.subject}</Text>
+      <Text style={styles.body}>{item.body}</Text>
     </View>
   );
 
@@ -106,7 +110,7 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ messages: initialMessag
         {/* Messages List */}
         <FlatList
           data={messages}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.physician_id}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
         />
@@ -218,8 +222,8 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
   },
   subject: {
-    marginTop: 4,
-    fontSize: 12,
+    marginTop: 16,
+    fontSize: 16,
     color: '#6b7280',
   },
   loaderContainer: {
@@ -290,6 +294,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
   },
+
+  body: {
+    marginTop: 4,
+    fontSize: 14,
+    color: "#374151",
+    alignItems: "center", // need to position the body well
+  },
+  
   sendText: {
     color: '#ffffff',
     fontSize: 14,
