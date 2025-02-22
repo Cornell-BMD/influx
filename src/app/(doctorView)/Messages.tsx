@@ -63,7 +63,7 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ messages: initialMessag
       <View style={styles.messageHeader}>
         <View style={styles.indicator} />
         <Text style={styles.sender}>{item.id}</Text>
-        <Text style={styles.date}>{item.date}</Text>
+        <Text style={styles.date}>{item.sent}</Text>
       </View>
       <Text style={styles.subject}>{item.subject}</Text>
       <Text style={styles.body}>{item.body}</Text>
