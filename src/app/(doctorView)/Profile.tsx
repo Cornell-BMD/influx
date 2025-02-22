@@ -2,6 +2,15 @@ import React from 'react';
 import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, Linking } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+interface Physician {
+  physician_id: string;   // uuid
+  name: string;           // character varying
+  email: string;          // character varying
+  phone: string;          // character varying
+  address: string;        // character varying
+  profile_image: string;  // bytea
+}
+
 const ProfileScreen = () => {
   return (
     <ScrollView style={styles.container}>

@@ -11,12 +11,23 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Menu, MenuTrigger, MenuOptions, MenuOption, MenuProvider } from 'react-native-popup-menu';
+import { supabase } from '@/lib/supabase';
 
+/*
 interface Message {
   id: string;
   sender: string;
   date: string;
   subject: string;
+}*/
+
+interface Message {
+  id: number;           // integer
+  physician_id: string; // uuid
+  patient_id: string;   // uuid
+  subject: string;      // text
+  body: string;         // text
+  sent: string;         // timestamp without time zone
 }
 
 interface MessagesScreenProps {
@@ -32,9 +43,8 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ messages: initialMessag
   const fetchMessages = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3000/messages'); // Replace with API endpoint
-      const data: Message[] = await response.json();
-      setMessages(data);
+      const {data: messages} = await supabase.from('messages').select('*').eq("physician_id", "273b91fd-9fab-4ab3-911e-9eb89689aa60"); // change to session physician_id
+      setMessages(messages);
     } catch (error) {
       console.error('Failed to fetch messages:', error);
     } finally {
@@ -52,7 +62,7 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ messages: initialMessag
     <View style={styles.messageContainer}>
       <View style={styles.messageHeader}>
         <View style={styles.indicator} />
-        <Text style={styles.sender}>{item.sender}</Text>
+        <Text style={styles.sender}>{item.id}</Text>
         <Text style={styles.date}>{item.date}</Text>
       </View>
       <Text style={styles.subject}>{item.subject}</Text>

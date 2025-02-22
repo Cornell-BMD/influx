@@ -18,7 +18,7 @@ const index = () => {
 
   return (
     <View style={{ flex: 1, justifyContent: "center", padding: 10 }}>
-      <Link href={"/sign-in"} asChild>
+      <Link href={"/sign-up"} asChild>
         <Button text="Create New Account" />
       </Link>
       <Link href={"/sign-in"} asChild>
