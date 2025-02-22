@@ -14,13 +14,6 @@ import { Menu, MenuTrigger, MenuOptions, MenuOption, MenuProvider } from 'react-
 import { Timestamp } from 'react-native-reanimated/lib/typescript/commonTypes';
 import { supabase } from '@/lib/supabase';
 
-/*
-interface Message {
-  physician_id: string; //maybe uuid
-  sent: Timestamp; //maybe consider date here
-  subject: string;
-}*/
-
 interface Message {
   id: number;           // integer
   physician_id: string; // uuid
