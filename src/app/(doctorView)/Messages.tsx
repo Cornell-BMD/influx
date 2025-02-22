@@ -11,13 +11,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Menu, MenuTrigger, MenuOptions, MenuOption, MenuProvider } from 'react-native-popup-menu';
+import { Timestamp } from 'react-native-reanimated/lib/typescript/commonTypes';
 import { supabase } from '@/lib/supabase';
 
 /*
 interface Message {
-  id: string;
-  sender: string;
-  date: string;
+  physician_id: string; //maybe uuid
+  sent: Timestamp; //maybe consider date here
   subject: string;
 }*/
 
@@ -66,6 +66,7 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ messages: initialMessag
         <Text style={styles.date}>{item.date}</Text>
       </View>
       <Text style={styles.subject}>{item.subject}</Text>
+      <Text style={styles.body}>{item.body}</Text>
     </View>
   );
 
@@ -116,7 +117,7 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ messages: initialMessag
         {/* Messages List */}
         <FlatList
           data={messages}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.physician_id}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
         />
@@ -228,8 +229,8 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
   },
   subject: {
-    marginTop: 4,
-    fontSize: 12,
+    marginTop: 16,
+    fontSize: 16,
     color: '#6b7280',
   },
   loaderContainer: {
@@ -300,6 +301,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
   },
+
+  body: {
+    marginTop: 4,
+    fontSize: 14,
+    color: "#374151",
+    alignItems: "center", // need to position the body well
+  },
+  
   sendText: {
     color: '#ffffff',
     fontSize: 14,

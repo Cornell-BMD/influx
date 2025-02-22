@@ -4,15 +4,10 @@ const PORT = 3000;
 
 // Example messages data
 const messages = [
-  { id: '1', sender: 'Dr. Lila Millington', date: '11/04/2023', subject: 'Appointment Summary' },
-  { id: '2', sender: 'Dr. Lila Millington', date: '11/02/2023', subject: 'Updated Dosage (11/02)' },
-  { id: '3', sender: 'Dr. Lila Millington', date: '10/31/2023', subject: 'Appointment Summary' },
-  { id: '4', sender: 'Dr. Lila Millington', date: '10/28/2023', subject: 'Updated Dosage Today (10/28)' },
-  { id: '5', sender: 'Dr. Lila Millington', date: '10/28/2023', subject: 'Appointment Summary' },
-  { id: '6', sender: 'Dr. Lila Millington', date: '10/26/2023', subject: 'Please replace the pod correctly' },
-  { id: '7', sender: 'Dr. Lila Millington', date: '10/22/2023', subject: 'Appointment Summary' },
-  { id: '8', sender: 'Dr. Lila Millington', date: '10/19/2023', subject: 'Updated Dosage (10/19)' },
-  { id: '9', sender: 'Dr. Lila Millington', date: '10/19/2023', subject: 'Appointment Summary' },
+  { phsycian_id: '1', sent: '11/04/2023', subject: 'Appointment Summary',body: 'please reset the device before 10am', name : 'John Doe' },
+  { phsycian_id: '1', sent: '11/04/2023', subject: 'Upcoming Appointment',body: 'please reset the device before 10am', name : 'John Doe' },
+  { phsycian_id: '1', sent: '11/04/2023', subject: 'Availability',body: 'please reset the device before 10am. If you need sny guidance, please do not hesitate to call me or ny of my assistants. You know we always have your back', name : 'John Doe' },
+  { phsycian_id: '1', sent: '11/04/2023', subject: 'Appointment Summary',body: 'please reset the device before 10am', name : 'John Doe' },
 ];
 
 // Middleware to parse JSON requests
