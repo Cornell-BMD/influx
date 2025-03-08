@@ -1,70 +1,91 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, FlatList, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
-const [modalVisible, setModalVisible] = useState<boolean>(false);
 
-type TreatmentItem = {
-  time: string;
-  injected: string;
-  remaining: string;
-  completed: boolean;
+const patient = {
+  patient_id: "123",
+  name: "Wellington Mapise",
+  gender: "male",
+  height: 67,
+  weight: 100,
+  birthdate: "1996-07-04",
+  patient_since: "2024-09-16",
+  profile_image: "https://static.vecteezy.com/system/resources/previews/009/391/589/non_2x/man-face-clipart-design-illustration-free-png.png",
 };
 
-type Message = {
-  id: string;
-  doctorName: string;
-  date: string;
-  subject: string;
+const devices = [
+  {
+    device_id: 1,
+    device_status: "Active",
+    last_sync: "2024-03-07T10:30:00Z",
+    battery_level: 80,
+    medication_level: 50,
+  },
+];
+
+const messages = [
+  {
+    message_id: 1,
+    physician_id: "321",
+    subject: "Updated Morning Dosage",
+    body: "Please adjust the morning dosage to 15mL.",
+    sent: "2024-03-07T08:00:00Z",
+  },
+  {
+    message_id: 2,
+    physician_id: "654",
+    subject: "Appointment Summary",
+    body: "Your checkup went well. Continue medication as prescribed.",
+    sent: "2024-02-20T12:30:00Z",
+  },
+];
+
+// Mock Treatment Plan Data
+const deviceData = {
+  initial_medication: 100, // Initial medication amount (in mL)
+  medication_left: 15, // Remaining medication (in mL)
+  schedule: ["15:40", "16:45", "19:50", "22:15", "23:30"], // Scheduled times
 };
+
+// Function to calculate "Injected" and "Remaining" dynamically
+const calculateTreatmentPlan = () => {
+  const totalUsage = deviceData.initial_medication - deviceData.medication_left;
+  const dosagePerTime = totalUsage / deviceData.schedule.length;
+  let remaining = deviceData.initial_medication;
+
+  return deviceData.schedule.map((time, index) => {
+    remaining -= dosagePerTime; 
+    const percentageLeft = Math.max(0, (remaining / deviceData.initial_medication) * 100);
+    const hasPassed = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) >= time;
+
+    return {
+      time,
+      injected: `${Math.round(dosagePerTime)}mL`,
+      remaining: `${Math.round(percentageLeft)}%`,
+      completed: hasPassed,
+    };
+  });
+};
+
 const PatientDetails = () => {
-  const [treatmentPlan, setTreatmentPlan] = useState<TreatmentItem[]>([
-    { time: '7:30', injected: '10mL', remaining: '93%', completed: true },
-    { time: '8:25', injected: '10mL', remaining: '86%', completed: true },
-    { time: '9:55', injected: '15mL', remaining: '75%', completed: false },
-    { time: '11:25', injected: '15mL', remaining: '64%', completed: false },
-    { time: '13:30', injected: '18mL', remaining: '52%', completed: false },
-  ]);
+  const [treatmentPlan, setTreatmentPlan] = useState(calculateTreatmentPlan());
 
-  const [messages, setMessages] = useState<Message[]>([
-    { id: '1', doctorName: 'Dr. Lila Millington', date: '12/03/2023', subject: 'Updated Morning Dosage' },
-    { id: '2', doctorName: 'Dr. Lila Millington', date: '11/14/2023', subject: 'Appointment Summary' },
-  ]);
 
-  const toggleCompletion = (index: number) => {
-    const updatedPlan = [...treatmentPlan];
-    updatedPlan[index].completed = !updatedPlan[index].completed;
-    setTreatmentPlan(updatedPlan);
+  const calculateAge = (birthdate: string) => {
+    const birthYear = new Date(birthdate).getFullYear();
+    const currentYear = new Date().getFullYear();
+    return currentYear - birthYear;
   };
 
-  const renderTreatmentItem = ({ item, index }: { item: TreatmentItem, index: number }) => (
-    <View style={styles.treatmentRow}>
-      <Text style={styles.treatmentTime}>{item.time}</Text>
-      <View style={styles.timelineDot} />
-      <Text style={styles.treatmentInjected}>{item.injected}</Text>
-      <Text style={styles.treatmentRemaining}>{item.remaining}</Text>
-      <TouchableOpacity onPress={() => toggleCompletion(index)}>
-        <MaterialIcons
-          name={item.completed ? 'check-circle' : 'radio-button-unchecked'}
-          size={24}
-          color={item.completed ? '#4CAF50' : '#B0B0B0'}
-        />
-      </TouchableOpacity>
-    </View>
-  );
-
-  const renderMessageItem = ({ item }: { item: Message }) => (
-    <View style={styles.messageCard}>
-      <View style={styles.messageRow}>
-        <Text style={styles.messageDoctor}>{item.doctorName}</Text>
-        <Text style={styles.messageDate}>{item.date}</Text>
-      </View>
-      <Text style={styles.messageSubject}>{item.subject}</Text>
-    </View>
-  );
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTreatmentPlan(calculateTreatmentPlan());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity>
@@ -75,197 +96,191 @@ const PatientDetails = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Device Status Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>DEVICE STATUS</Text>
-        <View style={styles.deviceStatus}>
-          <View style={styles.dosageContainer}>
-            <Text style={styles.dosageLabel}>Remaining Dosage</Text>
-            <View style={styles.dosageCircle}>
-              <Text style={styles.dosageText}>100%</Text>
-            </View>
-          </View>
-          <View style={styles.deviceDetails}>
-            <Text style={styles.nextReplacement}>Next replacement in <Text style={styles.bold}>1 day</Text></Text>
-            <TouchableOpacity style={styles.emergencyButton}
-            
-            onPress ={() => {() => setModalVisible(true)}}>
-            
-  
+      {/* Profile Section */}
+    <View style={styles.profileContainer}>
+      {/* Left: Profile Image */}
+      <Image source={{ uri: patient.profile_image }} style={styles.profileImage} />
 
-
-              <Text style={styles.emergencyText}>EMERGENCY SHUTOFF</Text>
-            </TouchableOpacity>
-          </View>
+      {/* Right: Status and Buttons */}
+      <View style={styles.profileActions}>
+        <View style={styles.replacementContainer}>
+          <Text style={styles.replacementText}>Next replacement in</Text>
+          <Text style={styles.replacementBold}>1 day</Text>
         </View>
-      </View>
 
+        <TouchableOpacity style={styles.messageButton}>
+          <Text style={styles.messageText}>Send Message</Text>
+          <MaterialIcons name="send" size={16} color="white" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.emergencyButton}>
+          <Text style={styles.emergencyText}>EMERGENCY SHUTOFF</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+
+       {/* Patient Information Section */}
+    <View style={styles.infoSection}>
+      <Text style={styles.sectionTitle}>PATIENT INFO</Text>
+      <View style={styles.divider} />
+
+      <View style={styles.infoRow}>
+        <Text style={styles.infoLabel}>Date of Birth</Text>
+        <Text style={styles.infoValue}>{patient.birthdate}</Text>
+      </View>
+      <View style={styles.infoRow}>
+        <Text style={styles.infoLabel}>Date Joined</Text>
+        <Text style={styles.infoValue}>{patient.patient_since}</Text>
+      </View>
+      <View style={styles.infoRow}>
+        <Text style={styles.infoLabel}>Age</Text>
+        <Text style={styles.infoValue}>{calculateAge(patient.birthdate)}</Text>
+      </View>
+      <View style={styles.infoRow}>
+        <Text style={styles.infoLabel}>Gender</Text>
+        <Text style={styles.infoValue}>{patient.gender}</Text>
+      </View>
+      <View style={styles.infoRow}>
+        <Text style={styles.infoLabel}>Height</Text>
+        <Text style={styles.infoValue}>{patient.height} inches</Text>
+      </View>
+      <View style={styles.infoRow}>
+        <Text style={styles.infoLabel}>Weight</Text>
+        <Text style={styles.infoValue}>{patient.weight} lbs</Text>
+      </View>
+    </View>
+
+
+      
       {/* Treatment Plan Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>TREATMENT PLAN</Text>
-        <FlatList
-          data={treatmentPlan}
-          renderItem={renderTreatmentItem}
-          keyExtractor={(item, index) => index.toString()}
-        />
-      </View>
-
-      {/* Messages Section */}
-      <View style={styles.section}>
-        <View style={styles.messagesHeader}>
-          <Text style={styles.sectionTitle}>MESSAGES</Text>
-          <TouchableOpacity>
-            <Text style={styles.viewAll}>View All</Text>
-          </TouchableOpacity>
+        <View style={styles.tableHeader}>
+          <Text style={styles.headerText}>Time</Text>
+          <Text style={styles.headerText}>Injected</Text>
+          <Text style={styles.headerText}>Remaining</Text>
+          <Text style={styles.headerText}>✔</Text>
         </View>
-        <FlatList
-          data={messages}
-          renderItem={renderMessageItem}
-          keyExtractor={(item) => item.id}
-        />
+
+        {treatmentPlan.map((entry, index) => (
+          <View key={index} style={styles.treatmentRow}>
+            <View style={styles.timelineContainer}>
+              <View style={[styles.timelineDot, index === 0 && styles.firstDot]} />
+              {index !== treatmentPlan.length - 1 && <View style={styles.timelineLine} />}
+              <Text style={styles.timeText}>{entry.time}</Text>
+            </View>
+            <Text style={styles.treatmentInjected}>{entry.injected}</Text>
+            <Text style={styles.treatmentRemaining}>{entry.remaining}</Text>
+            <MaterialIcons
+              name={entry.completed ? "check-circle" : "radio-button-unchecked"}
+              size={24}
+              color={entry.completed ? "#4CAF50" : "#B0B0B0"}
+            />
+          </View>
+        ))}
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#F8F9FB',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  container: { flex: 1, padding: 20, backgroundColor: '#F8F9FB' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20, marginTop: 50 },
+  statusContainer: { backgroundColor: '#EDEDED', padding: 8, borderRadius: 10, marginVertical: 10 },
+  statusText: { fontSize: 14 },
+
+  profileContainer: {
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    alignItems: "center",
     marginBottom: 20,
-    marginTop: 70,
+    paddingHorizontal: 10,
+    alignSelf: "stretch",
   },
-  section: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 20,
-    elevation: 5,
+  profileImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 50, 
+    paddingHorizontal: 20,
+    gap: 20
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#4A4A4A',
+  profileActions: {
+    alignItems: "flex-start", 
   },
-  deviceStatus: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  replacementContainer: {
+    backgroundColor: "#F2F2F7",
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    borderRadius: 15,
+    alignItems: "center",
+    marginBottom: 8,
+    width: "80%",
   },
-  dosageContainer: {
-    alignItems: 'center',
+  replacementText: {
+    fontSize: 12,
+    color: "#555",
   },
-  dosageLabel: {
+  replacementBold: {
     fontSize: 14,
-    color: '#4A4A4A',
+    fontWeight: "bold",
   },
-  dosageCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#EDE7F6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 10,
+  messageButton: {
+    backgroundColor: "#957DFF",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    marginBottom: 8,
+    width: "80%",
   },
-  dosageText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#673AB7',
-  },
-  deviceDetails: {
-    alignItems: 'flex-end',
-  },
-  nextReplacement: {
-    fontSize: 14,
-    marginBottom: 10,
-    color: '#4A4A4A',
-  },
-  bold: {
-    fontWeight: 'bold',
+  messageText: {
+    color: "#fff",
+    fontWeight: "bold",
+    marginRight: 5,
   },
   emergencyButton: {
-    backgroundColor: '#F44336',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 5,
+    backgroundColor: "#F44336",
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 3,
+    width: "80%",
+  
   },
   emergencyText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
+    flexDirection: "column",
+    textAlign: "center",
+  
   },
-  treatmentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 15,
-  },
-  treatmentTime: {
-    fontSize: 14,
-    color: '#4A4A4A',
-    flex: 1,
-  },
-  timelineDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#9C27B0',
-    marginHorizontal: 10,
-  },
-  treatmentInjected: {
-    fontSize: 14,
-    color: '#4A4A4A',
-    flex: 1,
-    textAlign: 'center',
-  },
-  treatmentRemaining: {
-    fontSize: 14,
-    color: '#9C27B0',
-    flex: 1,
-    textAlign: 'center',
-  },
-  messagesHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  viewAll: {
-    fontSize: 14,
-    color: '#673AB7',
-    fontWeight: 'bold',
-  },
-  messageCard: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10,
-    elevation: 3,
-    marginBottom: 10,
-  },
-  messageRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 5,
-  },
-  messageDoctor: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#4A4A4A',
-  },
-  messageDate: {
-    fontSize: 12,
-    color: '#B0B0B0',
-  },
-  messageSubject: {
-    fontSize: 14,
-    color: '#4A4A4A',
-    fontStyle: 'italic',
-  },
+
+  // Treatment Plan Styles
+  section: { backgroundColor: '#fff', borderRadius: 12, padding: 15, marginBottom: 20, elevation: 5 },
+  sectionTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 10 },
+  tableHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+  headerText: { fontWeight: 'bold', fontSize: 14, color: '#666' },
+  treatmentRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 15 },
+  
+  timeText: { fontSize: 14, color: '#4A4A4A', flex: 1 },
+  treatmentInjected: { fontSize: 14, backgroundColor: '#EDEDED', padding: 5, borderRadius: 5, flex: 1, textAlign: 'center' },
+  treatmentRemaining: { fontSize: 14, color: '#673AB7', flex: 1, textAlign: 'center' },
+
+  // Patient Info Section
+  infoSection: { backgroundColor: '#fff', borderRadius: 12, padding: 15, marginBottom: 20, elevation: 5 },
+  //sectionTitle: { fontSize: 16, fontWeight: 'bold', textAlign: 'center', color: '#666' },
+  divider: { height: 1, backgroundColor: '#E0E0E0', marginVertical: 10 },
+  infoRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 5 },
+  infoLabel: { fontSize: 14, color: '#555' },
+  infoValue: { fontSize: 14, fontWeight: 'bold', color: '#333' },
+
+  
+  // Timeline Styles
+  timelineContainer: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  timelineDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#9C27B0', marginHorizontal: 10 },
+  firstDot: { backgroundColor: '#6A1B9A' },
+  timelineLine: { width: 2, height: 20, backgroundColor: '#B39DDB', position: 'absolute', left: 14, top: 10 },
 });
 
 export default PatientDetails;
