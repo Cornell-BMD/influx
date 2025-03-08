@@ -11,6 +11,18 @@ export default function HomeScreen() {
   );
 }
 
+/*
+const fetchPatients = async () => {
+  try {
+    //const {data: patients} = await supabase.from('treatment_plans').select('patient_id, patients ( patient_id ) ').eq("physician_id", "273b91fd-9fab-4ab3-911e-9eb89689aa60");
+    const {data: patients} = await supabase.from('patients').select('*');
+    // const {data: patients} = await supabase.from('patients').select('*').eq("patient", "273b91fd-9fab-4ab3-911e-9eb89689aa60"); // TODO: change to session physician_id
+    return patients;
+  } catch (error) {
+    console.error('Failed to fetch patients:', error);
+  }
+};*/
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

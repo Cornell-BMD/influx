@@ -36,7 +36,7 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ messages: initialMessag
   const fetchMessages = async () => {
     try {
       setLoading(true);
-      const {data: messages} = await supabase.from('messages').select('*').eq("physician_id", "273b91fd-9fab-4ab3-911e-9eb89689aa60"); // change to session physician_id
+      const {data: messages} = await supabase.from('messages').select('*').eq("physician_id", "273b91fd-9fab-4ab3-911e-9eb89689aa60"); // TODO: change to session physician_id
       setMessages(messages);
     } catch (error) {
       console.error('Failed to fetch messages:', error);
