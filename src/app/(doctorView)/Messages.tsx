@@ -14,13 +14,22 @@ import { Menu, MenuTrigger, MenuOptions, MenuOption, MenuProvider } from 'react-
 import { Timestamp } from 'react-native-reanimated/lib/typescript/commonTypes';
 import { supabase } from '@/lib/supabase';
 
-interface Message {
+interface MessageDB {
   id: number;           // integer
   physician_id: string; // uuid
   patient_id: string;   // uuid
   subject: string;      // text
   body: string;         // text
   sent: string;         // timestamp without time zone
+}
+
+interface Message {
+  id: number;
+  physician_name: string;
+  patient_name: string;
+  subject: string;
+  body: string;
+  sent: string;
 }
 
 interface MessagesScreenProps {
@@ -32,12 +41,28 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ messages: initialMessag
   const [loading, setLoading] = useState<boolean>(!initialMessages);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
+  const reformatMessage = async (message: MessageDB) => {
+    try {
+      setLoading(true);
+      const new_message : Message = {id: message.id, physician_name: (await supabase.from('physicians').select('name').eq("physician_id", message.physician_id)).data![0].name,
+        patient_name: (await supabase.from('patients').select('name').eq("patient_id", message.patient_id)).data![0].name,
+        subject: message.subject, body: message.body, sent: message.sent};
+      return new_message;
+    } catch (error) {
+      console.error('Failed to fetch names:', error);
+      return {} as Message;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   // Dynamic data fetching
   const fetchMessages = async () => {
     try {
       setLoading(true);
       const {data: messages} = await supabase.from('messages').select('*').eq("physician_id", "273b91fd-9fab-4ab3-911e-9eb89689aa60"); // TODO: change to session physician_id
-      setMessages(messages);
+      const messagesPromise = (messages as MessageDB[])!.map(reformatMessage);
+      setMessages(await Promise.all(messagesPromise));
     } catch (error) {
       console.error('Failed to fetch messages:', error);
     } finally {
@@ -55,7 +80,7 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ messages: initialMessag
     <View style={styles.messageContainer}>
       <View style={styles.messageHeader}>
         <View style={styles.indicator} />
-        <Text style={styles.patient}>{item.patient_id}</Text>
+        <Text style={styles.patient}>{item.patient_name}</Text>
         <Text style={styles.date}>{item.sent}</Text>
       </View>
       <Text style={styles.subject}>{item.subject}</Text>
@@ -110,7 +135,7 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ messages: initialMessag
         {/* Messages List */}
         <FlatList
           data={messages}
-          keyExtractor={(item) => item.physician_id}
+          // keyExtractor={(item) => item.physician_id}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
         />
