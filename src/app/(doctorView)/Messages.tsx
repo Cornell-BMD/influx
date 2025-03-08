@@ -55,7 +55,7 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ messages: initialMessag
     <View style={styles.messageContainer}>
       <View style={styles.messageHeader}>
         <View style={styles.indicator} />
-        <Text style={styles.sender}>{item.id}</Text>
+        <Text style={styles.patient}>{item.patient_id}</Text>
         <Text style={styles.date}>{item.sent}</Text>
       </View>
       <Text style={styles.subject}>{item.subject}</Text>
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#4ade80',
     marginRight: 8,
   },
-  sender: {
+  patient: {
     fontWeight: '600',
     fontSize: 14,
     flex: 1,

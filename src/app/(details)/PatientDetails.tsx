@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
+const [modalVisible, setModalVisible] = useState<boolean>(false);
+
 type TreatmentItem = {
   time: string;
   injected: string;
@@ -85,7 +87,13 @@ const PatientDetails = () => {
           </View>
           <View style={styles.deviceDetails}>
             <Text style={styles.nextReplacement}>Next replacement in <Text style={styles.bold}>1 day</Text></Text>
-            <TouchableOpacity style={styles.emergencyButton}>
+            <TouchableOpacity style={styles.emergencyButton}
+            
+            onPress ={() => {() => setModalVisible(true)}}>
+            
+  
+
+
               <Text style={styles.emergencyText}>EMERGENCY SHUTOFF</Text>
             </TouchableOpacity>
           </View>

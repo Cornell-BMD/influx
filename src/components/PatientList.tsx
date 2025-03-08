@@ -12,7 +12,6 @@ import {
   Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-const router = useRouter();
 
 const DATA = [
   { id: '1', name: 'Susan Bridget', isFavorite: true },
@@ -26,6 +25,8 @@ const DATA = [
 const screenWidth = Dimensions.get('window').width;
 
 const PatientList = () => {
+  const router = useRouter(); // ✅ Move inside the function component
+
   const [searchQuery, setSearchQuery] = useState('');
   const [isSortedAscending, setIsSortedAscending] = useState(true);
   const [patients, setPatients] = useState(DATA);
@@ -46,7 +47,10 @@ const PatientList = () => {
   };
 
   const renderItem = ({ item }: { item: typeof DATA[0] }) => (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => router.push(`/(details)/PatientDetails`)} // ✅ Navigates correctly
+    >
       <View style={styles.cardContent}>
         <Image
           source={{
@@ -65,14 +69,7 @@ const PatientList = () => {
           />
         </TouchableOpacity>
       </View>
-      <TouchableOpacity 
-  style={styles.detailsButton} 
-  //onPress={() => router.push(`/details/${item.id}`)}
->
-  <Text style={styles.detailsButtonText}>Details</Text>
-</TouchableOpacity>
-
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -181,7 +178,7 @@ const styles = StyleSheet.create({
     elevation: 3,
     width: 350,
     alignSelf: 'center',
-   
+    height: 100,
   },
   cardContent: {
     flexDirection: 'row',
@@ -201,19 +198,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     color: '#374151',
-  },
-  detailsButton: {
-    marginTop: 12,
-    alignSelf: 'flex-start',
-    backgroundColor: '#a78bfa',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  detailsButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#ffffff',
   },
   listContent: {
     paddingBottom: 16,
