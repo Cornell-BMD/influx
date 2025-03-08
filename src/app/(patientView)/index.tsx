@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import PatientList from '../../components/PatientDetails';
-import PatientDetails from '../../components/PatientDetails';
+import PatientList from '../(details)/PatientDetails';
+import PatientDetails from '../(details)/PatientDetails';
 
 export default function HomeScreen() {
   return (

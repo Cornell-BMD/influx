@@ -1,1 +1,0 @@
-//make patient card component here
