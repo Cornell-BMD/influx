@@ -12,7 +12,18 @@ import {
   Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { supabase } from '@/lib/supabase';
 
+interface Patient {
+  patient_id: string;     // uuid
+  name: string;           // character varying
+  gender: string;         // text
+  height: number;         // double precision
+  weight: number;         // double precision
+  birthdate: string;      // date
+  patient_since: string;  // date
+  profile_image: string;  // bytea
+}
 
 const DATA = [
   { id: '1', name: 'Susan Bridget', isFavorite: true },
@@ -31,6 +42,17 @@ const PatientList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSortedAscending, setIsSortedAscending] = useState(true);
   const [patients, setPatients] = useState(DATA);
+
+  const fetchPatients = async () => {
+    try {
+      //const {data: patients} = await supabase.from('treatment_plans').select('patient_id, patients ( patient_id ) ').eq("physician_id", "273b91fd-9fab-4ab3-911e-9eb89689aa60");
+      const {data: patients} = await supabase.from('patients').select('*');
+      // const {data: patients} = await supabase.from('patients').select('*').eq("patient", "273b91fd-9fab-4ab3-911e-9eb89689aa60"); // TODO: change to session physician_id
+      return patients;
+    } catch (error) {
+      console.error('Failed to fetch patients:', error);
+    }
+  };  
 
   const filteredData = patients.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
