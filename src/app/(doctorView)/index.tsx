@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   FlatList,
@@ -15,24 +15,15 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { supabase } from '@/lib/supabase';
 
 interface Patient {
-  patient_id: string;     // uuid
-  name: string;           // character varying
-  gender: string;         // text
-  height: number;         // double precision
-  weight: number;         // double precision
-  birthdate: string;      // date
-  patient_since: string;  // date
-  profile_image: string;  // bytea
+  patient_id: string;
+  name: string;
+  gender: string;
+  height: number;
+  weight: number;
+  birthdate: string;
+  patient_since: string;
+  profile_image: string;
 }
-
-const DATA = [
-  { id: '1', name: 'Susan Bridget', isFavorite: true },
-  { id: '2', name: 'Elias Trent', isFavorite: false },
-  { id: '3', name: 'Mariana Solis', isFavorite: false },
-  { id: '4', name: 'Wellington Mapise', isFavorite: false },
-  { id: '5', name: 'Tatenda Gonese', isFavorite: false },
-  { id: '6', name: 'John Doe', isFavorite: false },
-];
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -41,18 +32,21 @@ const PatientList = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isSortedAscending, setIsSortedAscending] = useState(true);
-  const [patients, setPatients] = useState(DATA);
+  const [patients, setPatients] = useState<Patient[]>([]);
 
   const fetchPatients = async () => {
     try {
-      //const {data: patients} = await supabase.from('treatment_plans').select('patient_id, patients ( patient_id ) ').eq("physician_id", "273b91fd-9fab-4ab3-911e-9eb89689aa60");
-      const {data: patients} = await supabase.from('patients').select('*');
-      // const {data: patients} = await supabase.from('patients').select('*').eq("patient", "273b91fd-9fab-4ab3-911e-9eb89689aa60"); // TODO: change to session physician_id
-      return patients;
+      const { data, error } = await supabase.from('patients').select('*');
+      if (error) throw error;
+      if (data) setPatients(data);
     } catch (error) {
       console.error('Failed to fetch patients:', error);
     }
-  };  
+  };
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
 
   const filteredData = patients.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -62,45 +56,31 @@ const PatientList = () => {
     isSortedAscending ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
   );
 
-  const toggleFavorite = (id: string) => {
-    const updatedPatients = patients.map((item) =>
-      item.id === id ? { ...item, isFavorite: !item.isFavorite } : item
-    );
-    setPatients(updatedPatients);
-  };
-
-  const renderItem = ({ item }: { item: typeof DATA[0] }) => (
+  const renderItem = ({ item }: { item: Patient }) => (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => router.push(`/(details)/PatientDetails`)} 
+      onPress={() => router.push({ pathname: '/(details)/PatientDetails', params: { id: item.patient_id } })}
+
     >
       <View style={styles.cardContent}>
         <Image
-          source={{
-            uri: 'https://static.vecteezy.com/system/resources/previews/009/391/589/non_2x/man-face-clipart-design-illustration-free-png.png',
-          }}
+          source={{ uri: item.profile_image }}
           style={styles.avatar}
         />
         <View style={styles.textContainer}>
           <Text style={styles.title}>{item.name}</Text>
         </View>
-        <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
-          <Icon
-            name={item.isFavorite ? 'star' : 'star-outline'}
-            size={24}
-            color={item.isFavorite ? '#fbbf24' : '#9ca3af'}
-          />
-        </TouchableOpacity>
+        {/* <TouchableOpacity>
+          <Icon name={'star-outline'} size={24} color={'#9ca3af'} />
+        </TouchableOpacity> */}
       </View>
     </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Title */}
       <Text style={styles.titleText}>Find Your Patient</Text>
 
-      {/* Search Bar */}
       <View style={styles.searchContainer}>
         <Icon name="search" size={20} color="#aaa" style={styles.searchIcon} />
         <TextInput
@@ -112,7 +92,6 @@ const PatientList = () => {
         />
       </View>
 
-      {/* Sort Button */}
       <View style={styles.sortContainer}>
         <TouchableOpacity onPress={() => setIsSortedAscending(!isSortedAscending)}>
           <View style={styles.sortButton}>
@@ -123,12 +102,11 @@ const PatientList = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Patient List */}
       {sortedData.length > 0 ? (
         <FlatList
           data={sortedData}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.patient_id}
           contentContainerStyle={styles.listContent}
         />
       ) : (
